@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Environment files (will set in Hugging Face UI)
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+test_*.py
+*_test.py
+verify_app.py
+init_neon_db.py
+test_neon_connection.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Alembic (using direct table creation)
+alembic/
+alembic.ini
+
+# Deployment files (not needed in Space)
+railway.json
+Procfile
+.env.example
+
+# Git
+.git/

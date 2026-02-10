@@ -6,7 +6,8 @@ from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
+from fastapi.security.http import HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -72,7 +73,7 @@ def create_access_token(user_id: UUID, email: str) -> str:
 
 
 def get_current_user_id(
-    credentials: HTTPAuthCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> str:
     """
     FastAPI dependency to extract and validate user_id from JWT token.
@@ -146,3 +147,59 @@ def get_current_user_id(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+    FastAPI dependency to get the current authenticated User object.
+
+    This extracts the user_id from the JWT token and fetches the full User
+    object from the database.
+
+    Args:
+        credentials: HTTP Bearer token from Authorization header
+
+    Returns:
+        User object from database
+
+    Raises:
+        HTTPException 401: If token is invalid or user not found
+
+    Usage:
+        @app.get("/api/profile")
+        def get_profile(current_user: User = Depends(get_current_user)):
+            return current_user
+    """
+    from sqlmodel import Session, select
+    from src.database import get_session
+    from src.models.user import User
+
+    # Get user_id from token
+    user_id_str = get_current_user_id(credentials)
+
+    # Convert to UUID
+    try:
+        user_id = UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID in token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Fetch user from database
+    # Note: We need to create a session here
+    from src.database import engine
+    with Session(engine) as session:
+        user = session.get(User, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        # Detach from session so it can be used outside this context
+        session.expunge(user)
+        return user

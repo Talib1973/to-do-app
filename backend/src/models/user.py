@@ -1,9 +1,13 @@
 """User model for authentication and ownership."""
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from .conversation import Conversation
+    from .message import Message
 
 
 class User(SQLModel, table=True):
@@ -30,6 +34,12 @@ class User(SQLModel, table=True):
         description="Unique user identifier"
     )
 
+    name: str = Field(
+        max_length=100,
+        nullable=False,
+        description="User's full name"
+    )
+
     email: str = Field(
         max_length=255,
         nullable=False,
@@ -54,6 +64,10 @@ class User(SQLModel, table=True):
         nullable=False,
         description="Last update timestamp (auto-updated by trigger)"
     )
+
+    # Relationships (AI chatbot feature)
+    conversations: List["Conversation"] = Relationship(back_populates="user")
+    messages: List["Message"] = Relationship(back_populates="user")
 
     class Config:
         """Pydantic model configuration."""
