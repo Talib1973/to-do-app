@@ -9,9 +9,17 @@ class SignupRequest(BaseModel):
     Request schema for user signup.
 
     Attributes:
+        name: User's full name
         email: Valid email address
         password: Password (min 8 characters)
     """
+    name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="User's full name",
+        example="John Doe"
+    )
     email: EmailStr = Field(
         ...,
         description="User email address",
@@ -23,6 +31,13 @@ class SignupRequest(BaseModel):
         description="Password (minimum 8 characters)",
         example="mypassword123"
     )
+
+    @validator('name')
+    def name_not_empty(cls, v):
+        """Ensure name is not just whitespace."""
+        if not v or not v.strip():
+            raise ValueError('Name cannot be empty or whitespace')
+        return v.strip()
 
     @validator('password')
     def password_not_empty(cls, v):
@@ -85,6 +100,7 @@ class UserResponse(BaseModel):
 
     Attributes:
         id: User UUID
+        name: User's full name
         email: User email address
         created_at: Account creation timestamp
     """
@@ -92,6 +108,11 @@ class UserResponse(BaseModel):
         ...,
         description="User unique identifier",
         example="123e4567-e89b-12d3-a456-426614174000"
+    )
+    name: str = Field(
+        ...,
+        description="User's full name",
+        example="John Doe"
     )
     email: str = Field(
         ...,

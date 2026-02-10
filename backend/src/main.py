@@ -1,8 +1,39 @@
 """FastAPI application entry point."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api import auth, tasks
+from src.api import auth, tasks, chat
+from src.database import init_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize database on startup."""
+    from sqlmodel import SQLModel
+    from src.database import engine
+
+    # Import models to register them with SQLModel
+    from src.models.user import User
+    from src.models.task import Task
+    from src.models.conversation import Conversation
+    from src.models.message import Message
+
+    # Drop all tables and recreate (for development)
+    # WARNING: This deletes all data!
+    print("🗑️  Dropping existing tables...")
+    SQLModel.metadata.drop_all(engine)
+
+    print("🔨 Creating fresh tables...")
+    SQLModel.metadata.create_all(engine)
+    print("✅ Database tables created successfully")
+
+    yield
+
+    # Cleanup on shutdown (if needed)
+    print("🔌 Shutting down...")
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -11,15 +42,13 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Next.js dev server
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=["*"],  # Allow all origins for now (will restrict in production)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,7 +66,8 @@ def read_root():
             "docs": "/docs",
             "health": "/health",
             "auth": "/api/auth",
-            "tasks": "/api/tasks"
+            "tasks": "/api/tasks",
+            "chat": "/api/{user_id}/chat"
         }
     }
 
@@ -65,6 +95,12 @@ app.include_router(
     tasks.router,
     prefix="/api/tasks",
     tags=["tasks"]
+)
+
+# Register chat router (AI chatbot feature)
+app.include_router(
+    chat.router,
+    tags=["chat"]
 )
 
 

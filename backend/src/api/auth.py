@@ -54,6 +54,7 @@ def signup(
 
     # Create new user
     new_user = User(
+        name=request.name,
         email=request.email.lower(),  # Store email in lowercase
         password_hash=password_hash
     )
@@ -73,6 +74,7 @@ def signup(
         token_type="bearer",
         user=UserResponse(
             id=new_user.id,
+            name=new_user.name,
             email=new_user.email,
             created_at=new_user.created_at
         )
@@ -134,6 +136,7 @@ def login(
         token_type="bearer",
         user=UserResponse(
             id=user.id,
+            name=user.name,
             email=user.email,
             created_at=user.created_at
         )
@@ -174,6 +177,7 @@ def get_current_user(
 
     return UserResponse(
         id=user.id,
+        name=user.name,
         email=user.email,
         created_at=user.created_at
     )
