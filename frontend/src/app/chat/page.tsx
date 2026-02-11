@@ -10,6 +10,9 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { Container } from '@/components/layout/Container';
 import { Header } from '@/components/layout/Header';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 export default function ChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
