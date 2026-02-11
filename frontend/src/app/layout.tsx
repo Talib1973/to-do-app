@@ -3,8 +3,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Todo App',
-  description: 'A simple and powerful task management application',
+  description: 'AI-powered task management',
 };
+
+// Force dynamic rendering for entire app
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function RootLayout({
   children,
@@ -13,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
