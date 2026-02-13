@@ -1,0 +1,173 @@
+# Default values for todo-chatbot
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  # Namespace for the deployment
+  namespace: default
+
+# Backend configuration
+backend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: phase_2-backend
+    pullPolicy: Never  # Use local image from minikube
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    name: backend
+
+  env:
+    - name: DATABASE_URL
+      value: "sqlite:////app/data/todo_app.db"
+    - name: BETTER_AUTH_SECRET
+      value: "test-secret-key-with-at-least-32-characters-for-jwt-signing"
+    - name: AI_PROVIDER
+      value: "openrouter"
+    - name: OPENROUTER_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: openrouter-secret
+          key: api-key
+    - name: AI_MODEL
+      value: "anthropic/claude-3.5-haiku"
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  volumes:
+    - name: backend-data
+      persistentVolumeClaim:
+        claimName: backend-pvc
+
+  volumeMounts:
+    - name: backend-data
+      mountPath: /app/data
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: phase_2-frontend
+    pullPolicy: Never  # Use local image from minikube
+    tag: "latest"
+
+  service:
+    type: NodePort  # Use NodePort for external access via minikube
+    port: 3000
+    targetPort: 3000
+    nodePort: 30000  # Fixed NodePort for consistent access
+    name: frontend
+
+  env:
+    - name: NEXT_PUBLIC_API_URL
+      value: "http://backend:8000"
+    - name: NODE_ENV
+      value: "production"
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+
+# Service Account settings
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+# Pod annotations and labels
+podAnnotations: {}
+podLabels:
+  app: todo-chatbot
+
+# Security contexts
+podSecurityContext: {}
+securityContext: {}
+
+# Storage for backend
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+# Ingress (disabled by default for minikube)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: todo-app.local
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: frontend
+        - path: /api
+          pathType: Prefix
+          backend: backend
+  tls: []
+
+# Autoscaling (disabled by default)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+# Node selector, tolerations, and affinity
+nodeSelector: {}
+tolerations: []
+affinity: {}
