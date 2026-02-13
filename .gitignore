@@ -12,4 +12,13 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
-.env*
+.env
+.env.local
+.env*.local
+# Keep .env.example tracked (it's a template without real secrets)
+!.env.example
+
+# Runtime files
+*.pid
+.backend.pid
+.frontend.pid
