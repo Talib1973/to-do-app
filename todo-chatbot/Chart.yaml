@@ -1,0 +1,28 @@
+apiVersion: v2
+name: todo-chatbot
+description: A Helm chart for Todo App with AI Chatbot - Full-stack application with FastAPI backend and Next.js frontend
+
+# Application chart type
+type: application
+
+# Chart version - increment when making changes to the chart
+version: 1.0.0
+
+# Application version - the version of the Todo App being deployed
+appVersion: "1.0.0"
+
+keywords:
+  - todo
+  - chatbot
+  - ai
+  - fastapi
+  - nextjs
+  - kubernetes
+
+maintainers:
+  - name: Todo App Team
+    email: support@todoapp.local
+
+home: https://github.com/your-org/todo-app
+sources:
+  - https://github.com/your-org/todo-app
