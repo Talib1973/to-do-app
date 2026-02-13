@@ -1,0 +1,21 @@
+# Core Framework
+fastapi==0.128.3
+uvicorn[standard]==0.25.0
+python-dotenv==1.0.0
+
+# Database
+sqlmodel==0.0.14
+psycopg2-binary==2.9.9
+
+# Authentication
+pyjwt==2.8.0
+passlib==1.7.4
+bcrypt==4.1.3
+
+# Validation
+pydantic>=2.7.0
+email-validator==2.1.0
+
+# AI & MCP (Model Context Protocol)
+openai==1.58.1
+mcp==1.1.1
