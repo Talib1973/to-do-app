@@ -1,6 +1,12 @@
 # Default values for todo-chatbot
 # This is a YAML-formatted file.
 
+# OpenRouter API key - NEVER commit the real key here.
+# Pass at deploy time:
+#   helm upgrade todo-app todo-chatbot/ --set openrouter.apiKey="sk-or-v1-..."
+openrouter:
+  apiKey: "REPLACE_ME"
+
 # Global settings
 global:
   # Namespace for the deployment
