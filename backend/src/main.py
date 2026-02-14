@@ -10,7 +10,16 @@ from src.database import init_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan context - DB init handled by init_db.py pre-startup script."""
+    """Initialize database on startup."""
+    from sqlmodel import SQLModel
+    from src.database import engine
+    from src.models.user import User
+    from src.models.task import Task
+    from src.models.conversation import Conversation
+    from src.models.message import Message
+    print("🔨 Creating database tables if not exist...")
+    SQLModel.metadata.create_all(engine)
+    print("✅ Database tables ready")
     yield
     print("🔌 Shutting down...")
 
