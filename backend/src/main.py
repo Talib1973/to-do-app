@@ -13,25 +13,14 @@ async def lifespan(app: FastAPI):
     """Initialize database on startup."""
     from sqlmodel import SQLModel
     from src.database import engine
-
-    # Import models to register them with SQLModel
     from src.models.user import User
     from src.models.task import Task
     from src.models.conversation import Conversation
     from src.models.message import Message
-
-    # Drop all tables and recreate (for development)
-    # WARNING: This deletes all data!
-    print("🗑️  Dropping existing tables...")
-    SQLModel.metadata.drop_all(engine)
-
-    print("🔨 Creating fresh tables...")
+    print("🔨 Creating database tables if not exist...")
     SQLModel.metadata.create_all(engine)
-    print("✅ Database tables created successfully")
-
+    print("✅ Database tables ready")
     yield
-
-    # Cleanup on shutdown (if needed)
     print("🔌 Shutting down...")
 
 
